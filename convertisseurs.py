@@ -1,22 +1,35 @@
 import csv
 import json
+from typing import override
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 import io
+from abc import ABC, abstractclassmethod, abstractmethod
+
+# ---------------------------------------------------------------------------
+# Classes abstraite
+# ---------------------------------------------------------------------------
+
+class Convertisseur(ABC):
+    @abstractmethod
+    def convertir(self, contenu: str) -> str:
+        pass
 
 
 # ---------------------------------------------------------------------------
 # Classes de conversion — sans hiérarchie commune
 # ---------------------------------------------------------------------------
 
-class CsvVersJson:
+class CsvVersJson(Convertisseur):
+    @override
     def convertir(self, contenu: str) -> str:
         lecteur = csv.DictReader(io.StringIO(contenu))
         lignes = list(lecteur)
         return json.dumps(lignes, ensure_ascii=False, indent=2)
 
 
-class JsonVersCsv:
+class JsonVersCsv(Convertisseur):
+    @override
     def convertir(self, contenu: str) -> str:
         donnees = json.loads(contenu)
         if not donnees:
@@ -28,7 +41,8 @@ class JsonVersCsv:
         return sortie.getvalue()
 
 
-class CsvVersXml:
+class CsvVersXml(Convertisseur):
+    @override
     def convertir(self, contenu: str) -> str:
         lecteur = csv.DictReader(io.StringIO(contenu))
         racine = ET.Element("donnees")
@@ -41,7 +55,8 @@ class CsvVersXml:
         return xml.dom.minidom.parseString(brut).toprettyxml(indent="  ")
 
 
-class XmlVersCsv:
+class XmlVersCsv(Convertisseur):
+    @override
     def convertir(self, contenu: str) -> str:
         racine = ET.fromstring(contenu)
         enregistrements = list(racine)
@@ -56,7 +71,8 @@ class XmlVersCsv:
         return sortie.getvalue()
 
 
-class JsonVersXml:
+class JsonVersXml(Convertisseur):
+    @override
     def convertir(self, contenu: str) -> str:
         donnees = json.loads(contenu)
         racine = ET.Element("donnees")
@@ -69,7 +85,8 @@ class JsonVersXml:
         return xml.dom.minidom.parseString(brut).toprettyxml(indent="  ")
 
 
-class XmlVersJson:
+class XmlVersJson(Convertisseur):
+    @override
     def convertir(self, contenu: str) -> str:
         racine = ET.fromstring(contenu)
         donnees = []
@@ -78,7 +95,8 @@ class XmlVersJson:
         return json.dumps(donnees, ensure_ascii=False, indent=2)
 
 
-class MarkdownVersHtml:
+class MarkdownVersHtml(Convertisseur):
+    @override
     def convertir(self, contenu: str) -> str:
         lignes = contenu.splitlines()
         html = []
